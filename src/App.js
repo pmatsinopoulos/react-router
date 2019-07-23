@@ -1,52 +1,110 @@
-import React from 'react';
-import { BrowserRouter as Router, Link, Route } from 'react-router-dom';
+import React, { Component } from 'react';
+import { BrowserRouter as Router,
+         Link,
+         Route,
+         Redirect,
+         withRouter } from 'react-router-dom';
 
 const App = () => {
   return (
     <Router>
       <div>
-        <h2>Accounts</h2>
-
+        <AuthButton />
         <ul>
           <li>
-            <Link to="/netflix">Netflix</Link>
+            <Link to="/public-page">Public Page</Link>
           </li>
 
           <li>
-            <Link to="/zillow-group">Zillow Group</Link>
+            <Link to="/protected-page">Protected Page</Link>
           </li>
 
-          <li>
-            <Link to="/yahoo">Yahoo</Link>
-          </li>
-
-          <li>
-            <Link to="/modus-create">Modus Create</Link>
-          </li>
+          <Route path="/public-page" component={Public}/>
+          <Route path="/login" component={Login}/>
+          <PrivateRoute path="/protected-page" component={Protected}/>
         </ul>
-
-        <Route path='/:id' component={Child}/>
-
-        <Route
-            path="/order/:direction(asc|desc)"
-            component={ComponentWithRegex}
-            />
-
       </div>
     </Router>
   )
 }
 
-const Child = ({match}) => (
-  <div>
-    <h3>ID: {match.params.id}</h3>
-  </div>
+const fakeAuth = {
+  isAuthenticated: false,
+  authenticate(cb) {
+    this.isAuthenticated = true;
+    setTimeout(cb, 100); // fake async
+  },
+  signout(cb) {
+    this.isAuthenticated = false;
+    setTimeout(cb, 100);
+  }
+};
+
+const AuthButton = withRouter(
+  ({match, location, history}) => {
+    console.debug('History', history)
+    console.dir(history)
+
+    console.debug('Location', location)
+    console.dir(location)
+
+    console.debug('Match', match)
+    console.dir(match)
+
+    return fakeAuth.isAuthenticated ? (
+      <p>
+        Welcome!{" "}
+        <button onClick={() => {fakeAuth.signout(() => history.push('/'))}}>
+          Sign Out
+        </button>
+      </p>
+    ) : (
+      <p>You are not logged in.</p>
+    )
+  }
 )
 
-const ComponentWithRegex = ({match}) => (
-  <div>
-    <h3>ASC or DESC: {match.params.direction}</h3>
-  </div>
+const PrivateRoute = ({component: Component, ...rest}) => (
+  <Route
+    {...rest}
+    render={props => (
+      fakeAuth.isAuthenticated ? (
+        <component {...props} />
+      ) : (
+        <Redirect
+          to={{
+            pathname: "/login",
+            state: {from: props.location}
+          }}
+          />
+      )
+    )}
+  />
 )
 
+const Public = () => <h3>Public</h3>
+const Protected = () => <h3>Protected</h3>
+
+class Login extends Component {
+  state = {redirectToReferrer: false}
+  login = () => {
+    fakeAuth.authenticate(() => {
+      this.setState({redirectToReferrer: true})
+    })
+  }
+
+  render() {
+    let { from } = this.props.location.state || {from: {pathname: "/"}};
+    let { redirectToReferrer } = this.state;
+
+    if (redirectToReferrer) return <Redirect to={from} />;
+
+    return (
+      <div>
+        <p>you must log in to view the page at {from.pathname}</p>
+        <button onClick={this.login}>Log In</button>
+      </div>
+    )
+  }
+}
 export default App;
