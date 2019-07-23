@@ -4,34 +4,26 @@ import './App.css';
 import { Route, Switch } from 'react-router-dom';
 
 const History = () => <h1>My History</h1>
-const About = () => <h1>About</h1>
+const About = (props) => <h1>About {props.extra}</h1>
 const Contact = () => <h1>Contact</h1>
+const Home = () => <h1>Home</h1>
 
 
 function App() {
+  const someVariable = 'peter';
+
   return (
     <div className="App">
         <Switch>
-          <Route path="/history" component={History}/>
-          <Route path="/about" component={About}/>
-          <Route path="/contact" component={Contact}/>
+          <Route exact path="/" component={Home}/>
+          <Route
+            path="/about"
+            render={props => <About {...props} extra={someVariable} />}
+          />
+
           <Route component={() => <h1>404</h1>}/>
         </Switch>
 
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
     </div>
   );
 }
