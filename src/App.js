@@ -1,19 +1,19 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { Route, Switch, Link, Redirect } from 'react-router-dom';
+import { Route, Switch, Link, NavLink, Redirect } from 'react-router-dom';
 
 const Home = () => (
   <div>
     <h1>Home</h1>
-    <Link to="/about">About</Link><br/>
+    <NavLink to="/about" activeClassName="foo">About</NavLink><br/>
     <Link to="/go_back">Go Back</Link>
   </div>
 )
 const About = () => (
   <div>
     <h1>About</h1>
-    <Link to="/">Home</Link><br/>
+    <NavLink to="/" activeClassName="foo">Home</NavLink><br/>
     <Link to="/go_back">Go Back</Link>
   </div>
 )
