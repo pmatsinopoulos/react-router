@@ -1,67 +1,50 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { BrowserRouter as Router,
          Route,
-         Link,
-         Prompt} from 'react-router-dom';
+         Redirect,
+         Switch,
+         Link} from 'react-router-dom';
 
-const App = () => {
-  return (
-    <Router>
-      <div>
-        <ul>
-          <li>
-            <Link to="/">Form</Link>
-          </li>
+const Home = () => (
+  <p>
+    A <code>&lt;Switch&gt;</code> renders the first child <code>&lt;Route&gt;</code>{" "}
+    that matches. A <code>&lt;Route&gt;</code> with no <code>path</code> always
+    matches.
+  </p>
+)
 
-          <li>
-            <Link to="/one">One</Link>
-          </li>
+const App = () => (
+  <Router>
+    <ul>
+      <li>
+        <Link to="/">Home</Link>
+      </li>
 
-          <li>
-            <Link to="/two">Two</Link>
-          </li>
-        </ul>
+      <li>
+        <Link to="/old-match">Old Match. To be redirected</Link>
+      </li>
 
-        <Route path="/" exact component={Form} />
-        <Route path="/one" render={() => <h3>One</h3>} />
-        <Route path="/two" render={() => <h3>Two</h3>} />
-      </div>
-    </Router>
-  )
-}
+      <li>
+        <Link to="/will-match">Will Match</Link>
+      </li>
 
-class Form extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      isBlocking: false
-    }
-    this.handleChange = this.handleChange.bind(this)
-  }
+      <li>
+        <Link to="/will-not-match">Will not match</Link>
+      </li>
+    </ul>
 
-  handleChange(event) {
-    let value = event.target.value
-    if (value.trim() === '') {
-      console.debug('nothing has been typed. we can leave')
-      if (this.state.isBlocking)
-        this.setState({isBlocking: false})
-    }
-    else {
-      if (!this.state.isBlocking)
-        this.setState({isBlocking: true})
-    }
-  }
+    <Switch>
+      <Route component={Home} path="/" exact/>
+      <Redirect from="/old-match" to="/will-match" exact/>
+      <Route component={WillMatch} path="/will-match" exact />
+      <Route component={NoMatch} />
+    </Switch>
+  </Router>
+)
 
-  render() {
-    let isBlocking = this.state.isBlocking
-    return (
-      <form>
-        <Prompt when={isBlocking}
-                message={(location, action) => `Are you sure that you want to go to ${location.pathname}. Action: ${action}`}/>
-        <input placeholder="Give your email" onChange={this.handleChange}/>
-      </form>
-    )
-  }
-}
+const WillMatch = () => <h3>Matched!</h3>
+const NoMatch = ({location}) => (
+  <h3>No match for {location.pathname}</h3>
+)
 
 export default App;
