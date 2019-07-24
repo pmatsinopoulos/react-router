@@ -1,39 +1,67 @@
 import React from 'react';
-import {BrowserRouter as Router, Route, Link} from 'react-router-dom';
+import { BrowserRouter as Router,
+         Route,
+         Link } from "react-router-dom";
 
-const PEEPS = [
-  { id: 0, name: "Michelle", friends: [1, 2, 3] },
-  { id: 1, name: "Sean", friends: [0, 3] },
-  { id: 2, name: "Kim", friends: [0, 1, 3] },
-  { id: 3, name: "David", friends: [1, 2] }
-];
-
-const findPeep = peepId => PEEPS.find(peep => peep.id == peepId)
+const routes = [
+  {
+    path: "/",
+    exact: true,
+    sidebar: () => <div>Home!</div>,
+    main: () => <h2>Home</h2>
+  },
+  {
+    path: "/bubblegum",
+    exact: false,
+    sidebar: () => <div>Bubblegum!</div>,
+    main: () => <h2>Bubblegum</h2>
+  },
+  {
+    path: "/shoelaces",
+    exact: false,
+    sidebar: () => <div>Show laces!</div>,
+    main: () => <h2>Show laces</h2>
+  }
+]
 
 const App = () => (
   <Router>
-    <Person match={{params: {id: 0}, url: ""}}/>
+    <div>
+      <div>
+        <ul>
+          <li>
+            <Link to="/">Home</Link>
+          </li>
+          <li>
+            <Link to="/bubblegum">BubbleGum</Link>
+          </li>
+          <li>
+            <Link to="/shoelaces">Shoe Laces</Link>
+          </li>
+        </ul>
+
+        {routes.map((route, index) => (
+          <Route
+            key={index}
+            path={route.path}
+            exact={route.exact}
+            component={route.sidebar}
+          />
+         ))}
+      </div>
+
+      <div>
+        {routes.map((route, index) => (
+          <Route
+            key={index}
+            component={route.main}
+            path={route.path}
+            exact={route.exact}
+          />
+        ))}
+      </div>
+    </div>
   </Router>
 )
 
-const Person = ({match}) => {
-  console.debug('Match', match)
-  let person = findPeep(match.params.id)
-
-  return (
-    <div>
-      <h3>{person.name}'s Friends</h3>
-      <ul>
-        {person.friends.map((friendId, index) => {
-          return (
-            <li key={friendId}>
-              <Link to={`${match.url}/${friendId}`} >{findPeep(friendId).name}</Link>
-            </li>
-          )
-        })}
-      </ul>
-      <Route component={Person} path={`${match.url}/:id`} />
-    </div>
-  )
-}
 export default App;
