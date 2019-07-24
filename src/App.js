@@ -1,110 +1,37 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { BrowserRouter as Router,
-         Link,
          Route,
-         Redirect,
-         withRouter } from 'react-router-dom';
+         Link} from 'react-router-dom';
 
-const App = () => {
-  return (
+const App = () => (
     <Router>
-      <div>
-        <AuthButton />
-        <ul>
-          <li>
-            <Link to="/public-page">Public Page</Link>
-          </li>
+      <h1>Custom Link Example</h1>
+      <OldSchoolMenuLink to="/about" label="About"/>
+      <OldSchoolMenuLink activeOnlyWhenExact={true} to="/" label="Home"/>
 
-          <li>
-            <Link to="/protected-page">Protected Page</Link>
-          </li>
-
-          <Route path="/public-page" component={Public}/>
-          <Route path="/login" component={Login}/>
-          <PrivateRoute path="/protected-page" component={Protected}/>
-        </ul>
-      </div>
+      <hr/>
+      <Route exact path="/about" component={About}/>
+      <Route exact path="/" component={Home}/>
     </Router>
-  )
-}
-
-const fakeAuth = {
-  isAuthenticated: false,
-  authenticate(cb) {
-    this.isAuthenticated = true;
-    setTimeout(cb, 100); // fake async
-  },
-  signout(cb) {
-    this.isAuthenticated = false;
-    setTimeout(cb, 100);
-  }
-};
-
-const AuthButton = withRouter(
-  ({match, location, history}) => {
-    console.debug('History', history)
-    console.dir(history)
-
-    console.debug('Location', location)
-    console.dir(location)
-
-    console.debug('Match', match)
-    console.dir(match)
-
-    return fakeAuth.isAuthenticated ? (
-      <p>
-        Welcome!{" "}
-        <button onClick={() => {fakeAuth.signout(() => history.push('/'))}}>
-          Sign Out
-        </button>
-      </p>
-    ) : (
-      <p>You are not logged in.</p>
-    )
-  }
 )
 
-const PrivateRoute = ({component: Component, ...rest}) => (
+const OldSchoolMenuLink = ({activeOnlyWhenExact, to, label}) => (
   <Route
-    {...rest}
-    render={props => (
-      fakeAuth.isAuthenticated ? (
-        <component {...props} />
-      ) : (
-        <Redirect
-          to={{
-            pathname: "/login",
-            state: {from: props.location}
-          }}
-          />
+    path={to}
+    exact={activeOnlyWhenExact}
+    children={({match}) => {
+      console.debug('match', match)
+      return (
+        <div className={match ? "active" : ""}>
+          {match ? "> " : ""}
+          <Link to={to}>{label}</Link>
+        </div>
       )
-    )}
+    }}
   />
 )
 
-const Public = () => <h3>Public</h3>
-const Protected = () => <h3>Protected</h3>
+const Home = () => <h1>Home</h1>
+const About = () => <h1>About</h1>
 
-class Login extends Component {
-  state = {redirectToReferrer: false}
-  login = () => {
-    fakeAuth.authenticate(() => {
-      this.setState({redirectToReferrer: true})
-    })
-  }
-
-  render() {
-    let { from } = this.props.location.state || {from: {pathname: "/"}};
-    let { redirectToReferrer } = this.state;
-
-    if (redirectToReferrer) return <Redirect to={from} />;
-
-    return (
-      <div>
-        <p>you must log in to view the page at {from.pathname}</p>
-        <button onClick={this.login}>Log In</button>
-      </div>
-    )
-  }
-}
 export default App;
