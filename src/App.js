@@ -1,37 +1,67 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { BrowserRouter as Router,
          Route,
-         Link} from 'react-router-dom';
+         Link,
+         Prompt} from 'react-router-dom';
 
-const App = () => (
+const App = () => {
+  return (
     <Router>
-      <h1>Custom Link Example</h1>
-      <OldSchoolMenuLink to="/about" label="About"/>
-      <OldSchoolMenuLink activeOnlyWhenExact={true} to="/" label="Home"/>
+      <div>
+        <ul>
+          <li>
+            <Link to="/">Form</Link>
+          </li>
 
-      <hr/>
-      <Route exact path="/about" component={About}/>
-      <Route exact path="/" component={Home}/>
+          <li>
+            <Link to="/one">One</Link>
+          </li>
+
+          <li>
+            <Link to="/two">Two</Link>
+          </li>
+        </ul>
+
+        <Route path="/" exact component={Form} />
+        <Route path="/one" render={() => <h3>One</h3>} />
+        <Route path="/two" render={() => <h3>Two</h3>} />
+      </div>
     </Router>
-)
+  )
+}
 
-const OldSchoolMenuLink = ({activeOnlyWhenExact, to, label}) => (
-  <Route
-    path={to}
-    exact={activeOnlyWhenExact}
-    children={({match}) => {
-      console.debug('match', match)
-      return (
-        <div className={match ? "active" : ""}>
-          {match ? "> " : ""}
-          <Link to={to}>{label}</Link>
-        </div>
-      )
-    }}
-  />
-)
+class Form extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      isBlocking: false
+    }
+    this.handleChange = this.handleChange.bind(this)
+  }
 
-const Home = () => <h1>Home</h1>
-const About = () => <h1>About</h1>
+  handleChange(event) {
+    let value = event.target.value
+    if (value.trim() === '') {
+      console.debug('nothing has been typed. we can leave')
+      if (this.state.isBlocking)
+        this.setState({isBlocking: false})
+    }
+    else {
+      if (!this.state.isBlocking)
+        this.setState({isBlocking: true})
+    }
+  }
+
+  render() {
+    let isBlocking = this.state.isBlocking
+    return (
+      <form>
+        <Prompt when={isBlocking}
+                message={(location, action) => `Are you sure that you want to go to ${location.pathname}. Action: ${action}`}/>
+        <input placeholder="Give your email" onChange={this.handleChange}/>
+      </form>
+    )
+  }
+}
 
 export default App;
