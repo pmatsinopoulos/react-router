@@ -1,50 +1,39 @@
 import React from 'react';
-import { BrowserRouter as Router,
-         Route,
-         Redirect,
-         Switch,
-         Link} from 'react-router-dom';
+import {BrowserRouter as Router, Route, Link} from 'react-router-dom';
 
-const Home = () => (
-  <p>
-    A <code>&lt;Switch&gt;</code> renders the first child <code>&lt;Route&gt;</code>{" "}
-    that matches. A <code>&lt;Route&gt;</code> with no <code>path</code> always
-    matches.
-  </p>
-)
+const PEEPS = [
+  { id: 0, name: "Michelle", friends: [1, 2, 3] },
+  { id: 1, name: "Sean", friends: [0, 3] },
+  { id: 2, name: "Kim", friends: [0, 1, 3] },
+  { id: 3, name: "David", friends: [1, 2] }
+];
+
+const findPeep = peepId => PEEPS.find(peep => peep.id == peepId)
 
 const App = () => (
   <Router>
-    <ul>
-      <li>
-        <Link to="/">Home</Link>
-      </li>
-
-      <li>
-        <Link to="/old-match">Old Match. To be redirected</Link>
-      </li>
-
-      <li>
-        <Link to="/will-match">Will Match</Link>
-      </li>
-
-      <li>
-        <Link to="/will-not-match">Will not match</Link>
-      </li>
-    </ul>
-
-    <Switch>
-      <Route component={Home} path="/" exact/>
-      <Redirect from="/old-match" to="/will-match" exact/>
-      <Route component={WillMatch} path="/will-match" exact />
-      <Route component={NoMatch} />
-    </Switch>
+    <Person match={{params: {id: 0}, url: ""}}/>
   </Router>
 )
 
-const WillMatch = () => <h3>Matched!</h3>
-const NoMatch = ({location}) => (
-  <h3>No match for {location.pathname}</h3>
-)
+const Person = ({match}) => {
+  console.debug('Match', match)
+  let person = findPeep(match.params.id)
 
+  return (
+    <div>
+      <h3>{person.name}'s Friends</h3>
+      <ul>
+        {person.friends.map((friendId, index) => {
+          return (
+            <li key={friendId}>
+              <Link to={`${match.url}/${friendId}`} >{findPeep(friendId).name}</Link>
+            </li>
+          )
+        })}
+      </ul>
+      <Route component={Person} path={`${match.url}/:id`} />
+    </div>
+  )
+}
 export default App;
